@@ -17,7 +17,7 @@ import pandas as pd
 # ================== LAB RESOURCES ARE LIMITED=================== #
 
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"  # see issue #152
-os.environ["CUDA_VISIBLE_DEVICES"] = "2"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 
 def get_session(gpu_fraction=0.5):
@@ -39,7 +39,7 @@ gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.5)
 
 # Batch size and maximum number of epochs
 MAX_EPOCH = 25
-BATCH_SIZE = 128
+BATCH_SIZE = 256
 
 # Input Dimension i.e. image pretrained VGG-net features
 n_x = 4096
@@ -179,6 +179,8 @@ print(len(image_paths))
 print(len(train_sketch_paths))
 print(len(test_sketch_paths))
 
+test_sketch_paths = test_sketch_paths[0: 5000]
+
 # -------------------------------------------------------------------------------------------------------------------#
 
 # form an inverted index for sketch paths
@@ -316,8 +318,11 @@ def find_precision():
 
 prec = 0
 
-vae.fit({'sketch_features': train_sketch_X, 'image_features': train_X_img}, [train_X_img, train_sketch_X],
-        batch_size=BATCH_SIZE, nb_epoch=MAX_EPOCH)
+find_precision()
+
+vae.fit({'sketch_features': train_sketch_X, 'image_features': train_X_img},
+        [train_X_img, train_sketch_X], batch_size=BATCH_SIZE, nb_epoch=MAX_EPOCH)
+
 find_precision()
 
 
