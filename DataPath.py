@@ -19,7 +19,7 @@ class Tools(object):
     pass
 
 
-class PreStepData(object):
+class DataPath(object):
 
     def __init__(self, sketchy_root="/home/ubuntu/data1.5TB/Sketchy/rendered_256x256/256x256",
                  data_result_root="./data/alisure", image_path="photo/tx_000100000000",

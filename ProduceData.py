@@ -4,15 +4,15 @@ import tensorflow as tf
 from SketchModel import SketchModel
 from keras.applications import vgg16
 from keras.preprocessing import image
-import keras.backend.tensorflow_backend as KTF
-from PreStepData import PreStepData, Tools, Parm
+from DataPath import DataPath, Tools, Parm
+import keras.backend.tensorflow_backend as ktf
 
 
 class ModelData(object):
 
     def __init__(self):
         self.sess = tf.Session(config=tf.ConfigProto(gpu_options=tf.GPUOptions(allow_growth=True)))
-        KTF.set_session(session=self.sess)
+        ktf.set_session(session=self.sess)
         pass
 
     @staticmethod
@@ -80,9 +80,9 @@ if __name__ == '__main__':
     os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
     # 加载路径
-    pre_step_data = PreStepData()
-    sketch_paths = pre_step_data.load_sketch_paths()
-    image_paths = pre_step_data.load_image_paths()
+    data_path = DataPath()
+    sketch_paths = data_path.load_sketch_paths()
+    image_paths = data_path.load_image_paths()
 
     model_data = ModelData()
     # 使用VGG模型处理Image和Sketch数据
@@ -97,5 +97,5 @@ if __name__ == '__main__':
         classes_num=Parm.sketch_model_class_num, input_shape=Parm.sketch_model_input_shape,
         weights="./model_sketch/first_aug/model.h5")
     model_data.predict(model=sketch_model, pre_process_input=pre_process, x_in_path=sketch_paths,
-                       save_path=pre_step_data.sketch_model_features_npy, batch_size=64, color_mode="grayscale",
+                       save_path=data_path.sketch_model_features_npy, batch_size=64, color_mode="grayscale",
                        target_size=[Parm.sketch_model_target_size, Parm.sketch_model_target_size])

@@ -1,11 +1,11 @@
 import os
 import numpy as np
 import tensorflow as tf
-import keras.backend as K
+import keras.backend as k
 from keras import callbacks
 from keras.models import Model
 from keras.optimizers import Adam
-import keras.backend.tensorflow_backend as KTF
+import keras.backend.tensorflow_backend as ktf
 from sklearn.neighbors import NearestNeighbors
 from keras.layers.normalization import BatchNormalization
 from keras.layers import Input, Dense, Lambda, Dropout, concatenate
@@ -100,10 +100,10 @@ class SketchyData(object):
 
         def get_image_path(sketch_path):
             temp_arr = sketch_path.replace('sketch', 'photo').split('-')
-            image_path = ''
-            for idx in range(len(temp_arr) - 1):
-                image_path += temp_arr[idx] + '-'
-            return image_path[:-1] + '.jpg'
+            _image_path = ''
+            for _index in range(len(temp_arr) - 1):
+                _image_path += temp_arr[_index] + '-'
+            return _image_path[:-1] + '.jpg'
 
         # 1.
         # 形成一个反向索引：sketch
@@ -220,7 +220,7 @@ class CVAE(object):
         self.hidden_size = 2048
 
         self.sess = tf.Session(config=tf.ConfigProto(gpu_options=tf.GPUOptions(allow_growth=True)))
-        KTF.set_session(session=self.sess)
+        ktf.set_session(session=self.sess)
 
         self.decoder, self.vae = self.build()
 
@@ -308,29 +308,30 @@ class CVAE(object):
 
     def _sample_z(self, args):
         mu, log_sigma = args
-        eps = K.random_normal(shape=[self.n_z], mean=0., stddev=1.)
-        return mu + K.exp(log_sigma / 2) * eps
+        eps = k.random_normal(shape=[self.n_z], mean=0., stddev=1.)
+        return mu + k.exp(log_sigma / 2) * eps
 
     def _vae_loss(self, y_true, y_pred):
         # E[log P(X|z)]
-        recon = K.mean(K.square(y_pred - y_true), axis=1)
+        recon = k.mean(k.square(y_pred - y_true), axis=1)
         # D_KL(Q(z|X) || P(z|X)); calculate in closed form as both dist. are Gaussian
-        kl = 0.5 * K.sum(K.exp(self.log_sigma) + K.square(self.mu) - 1. - self.log_sigma, axis=1)
+        kl = 0.5 * k.sum(k.exp(self.log_sigma) + k.square(self.mu) - 1. - self.log_sigma, axis=1)
         return recon + kl
 
     def test(self, epoch):
 
         def map_change(input_arr):
             dup = np.copy(input_arr)
-            for idx in range(input_arr.shape[1]):
-                if idx != 0:
-                    dup[:, idx] = dup[:, idx - 1] + dup[:, idx]
+            for _index in range(input_arr.shape[1]):
+                if _index != 0:
+                    dup[:, _index] = dup[:, _index - 1] + dup[:, _index]
             return np.multiply(dup, input_arr)
 
         # 噪声
         noise_z = np.random.normal(size=[len(self.test_sketch_paths), self.n_z])
         # 测试sketch
-        sketch_features_test = np.asarray([self.test_sketch_x[ii].copy() for ii in range(0, len(self.test_sketch_paths))])
+        sketch_features_test = np.asarray(
+            [self.test_sketch_x[ii].copy() for ii in range(0, len(self.test_sketch_paths))])
 
         # 预测的图片的重构特征
         # noise + sketch -> image features

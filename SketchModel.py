@@ -2,10 +2,10 @@ import os
 import numpy as np
 import tensorflow as tf
 from keras.optimizers import Adam
+from DataPath import DataPath, Tools
 from keras.preprocessing import image
-from PreStepData import PreStepData, Tools
-from keras import models, layers, losses, callbacks, preprocessing
 import keras.backend.tensorflow_backend as ktb
+from keras import models, layers, losses, callbacks, preprocessing
 
 
 class SketchData(object):
@@ -58,8 +58,8 @@ class SketchData(object):
     def _read_sketch_path(sketch_data_npy, train_test_ratio):
         # 获取目录
         if not os.path.exists(sketch_data_npy):
-            pre_step_data = PreStepData()
-            sketch_paths = pre_step_data.load_sketch_paths()
+            data_path = DataPath()
+            sketch_paths = data_path.load_sketch_paths()
             sketch_classes = np.asarray([os.path.basename(os.path.split(_)[0]) for _ in sketch_paths])
 
             test_class = [_.decode() for _ in np.load('./data/ZSSBIR_data/test_split_ref.npy')]
