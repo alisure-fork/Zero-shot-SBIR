@@ -76,26 +76,37 @@ class ModelData(object):
 
 if __name__ == '__main__':
 
-    os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"  # see issue #152
-    os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+    os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 
     # 加载路径
     data_path = DataPath()
-    sketch_paths = data_path.load_sketch_paths()
-    image_paths = data_path.load_image_paths()
 
+    # 加载模型
     model_data = ModelData()
-    # 使用VGG模型处理Image和Sketch数据
+
+    # 使用VGG模型处理Image数据
+    # image_paths = data_path.load_image_paths()
+    # vgg_model, pre_process = model_data.get_vgg_model_and_pre_process()
+    # model_data.predict(model=vgg_model, pre_process_input=pre_process, x_in_path=image_paths,
+    #                    save_path=data_path.image_vgg_features_npy, batch_size=64, target_size=(224, 224))
+
+    # 使用VGG模型处理Sketch数据
+    # sketch_paths = data_path.load_sketch_paths()
     # vgg_model, pre_process = model_data.get_vgg_model_and_pre_process()
     # model_data.predict(model=vgg_model, pre_process_input=pre_process, x_in_path=sketch_paths,
-    #                    save_path=pre_step_data.sketch_vgg_features_npy, batch_size=64)
-    # model_data.predict(model=vgg_model, pre_process_input=pre_process, x_in_path=image_paths,
-    #                    save_path=pre_step_data.image_vgg_features_npy, batch_size=64)
+    #                    save_path=data_path.sketch_vgg_features_npy, batch_size=64, target_size=(224, 224))
+
+    # 使用VGG模型处理Edge数据
+    # edge_paths = data_path.load_edge_paths()
+    # vgg_model, pre_process = model_data.get_vgg_model_and_pre_process()
+    # model_data.predict(model=vgg_model, pre_process_input=pre_process, x_in_path=edge_paths,
+    #                    save_path=data_path.edge_vgg_features_npy, batch_size=64, target_size=(224, 224))
 
     # 使用SketchModel处理Sketch数据
-    sketch_model, pre_process = model_data.get_sketch_model_and_pre_process(
-        classes_num=Parm.sketch_model_class_num, input_shape=Parm.sketch_model_input_shape,
-        weights="./model_sketch/first_aug/model.h5")
-    model_data.predict(model=sketch_model, pre_process_input=pre_process, x_in_path=sketch_paths,
-                       save_path=data_path.sketch_model_features_npy, batch_size=64, color_mode="grayscale",
-                       target_size=[Parm.sketch_model_target_size, Parm.sketch_model_target_size])
+    # sketch_model, pre_process = model_data.get_sketch_model_and_pre_process(
+    #     classes_num=Parm.sketch_model_class_num, input_shape=Parm.sketch_model_input_shape,
+    #     weights="./model_sketch/first_aug/model.h5")
+    # model_data.predict(model=sketch_model, pre_process_input=pre_process, x_in_path=sketch_paths,
+    #                    save_path=data_path.sketch_model_features_npy, batch_size=64, color_mode="grayscale",
+    #                    target_size=[Parm.sketch_model_target_size, Parm.sketch_model_target_size])

@@ -27,7 +27,7 @@ class SketchyData(object):
 
         # next load the sketch_paths
         # sketch_features = np.load(os.path.join(data_path_alisure, 'sketch_vgg_features.npy'))  # (75479, 4096)
-        sketch_features = np.load(os.path.join(data_path_alisure, 'sketch_model_features2.npy'))  # (75479, 4096)
+        sketch_features = np.load(os.path.join(data_path_alisure, 'sketch_model_features.npy'))  # (75479, 4096)
         sketch_paths = list(np.load(os.path.join(data_path_alisure, 'sketch_paths.npy')))  # (75479,)
 
         # next load the image extension dataset

@@ -7,3 +7,8 @@
 
 * VGG和Sketch分类两个都用： 80：0.4104 / 0.2891  7.3
 
+
+### Triplet Loss
+
+* 添加triplet loss：0.446, 0.307 3.6
+

@@ -26,7 +26,7 @@ class SketchyData(object):
 
         # next load the sketch_paths
         sketch_vgg_features = np.load(os.path.join(data_path_alisure, 'sketch_vgg_features.npy'))  # (75479, 4096)
-        sketch_model_features = np.load(os.path.join(data_path_alisure, 'sketch_model_features2.npy'))  # (75479, 4096)
+        sketch_model_features = np.load(os.path.join(data_path_alisure, 'sketch_model_features.npy'))  # (75479, 4096)
         sketch_paths = list(np.load(os.path.join(data_path_alisure, 'sketch_paths.npy')))  # (75479,)
 
         # next load the image extension dataset
@@ -616,36 +616,16 @@ class CVAE(object):
 
 
 """
-预测测试图片的图像特征，在增强的数据集中检索
-The mean precision@200 for test sketches is 0.43710059870805107
-The mAP for test_sketches is 0.2945816346062022
-使用原始测试图像（从VGG中提取）的图像特征，在增强的数据集中检索
-The mean precision@200 for test sketches is 0.7329506065857886
-The mAP for test_sketches is 0.6560596963331535
-预测测试图片的图像特征，在测试数据集中检索
-The mean precision@200 for test sketches is 0.5016247833622184
-The mAP for test_sketches is 0.38052382145525604
-使用原始测试图像（从VGG中提取）的图像特征，在测试数据集中检索
-The mean precision@200 for test sketches is 0.8496328974318577
-The mAP for test_sketches is 0.8044398214878347
-预测训练图片的图像特征，在训练集中检索
-The mean precision@200 for test sketches is 0.8552769681621992
-The mAP for test_sketches is 0.8092822680527767
-使用原始训练图像（从VGG中提取）的图像特征，在训练集中检索
-The mean precision@200 for test sketches is 0.8688856769713476
-The mAP for test_sketches is 0.8345214729457112
-预测测试图片的图像特征，在训练和测试集中检索
-The mean precision@200 for test sketches is 0.1234429651804002
-The mAP for test_sketches is 0.051532227084295924
-使用原始测试图像（从VGG中提取）的图像特征，在训练和测试集中检索
-The mean precision@200 for test sketches is 0.6806124940916969
-The mAP for test_sketches is 0.6030668249599961
-使用原始训练图像（从VGG中提取）的图像特征，在训练和测试集中检索
-The mean precision@200 for test sketches is 0.8506080080271394
-The mAP for test_sketches is 0.8122628671237255
-预测训练图片的图像特征，在训练和测试集中检索
-The mean precision@200 for test sketches is 0.8425386624619745
-The mAP for test_sketches is 0.7923908209325308
+0.4371005987080510 0.2945816346062020 预测测试图片的图像特征，在增强的数据集中检索
+0.7329506065857886 0.6560596963331535 使用原始测试图像（从VGG中提取）的图像特征，在增强的数据集中检索
+0.5016247833622184 0.3805238214552560 预测测试图片的图像特征，在测试数据集中检索
+0.8496328974318577 0.8044398214878347 使用原始测试图像（从VGG中提取）的图像特征，在测试数据集中检索
+0.8552769681621992 0.8092822680527767 预测训练图片的图像特征，在训练集中检索
+0.8688856769713476 0.8345214729457112 使用原始训练图像（从VGG中提取）的图像特征，在训练集中检索
+0.1234429651804002 0.0515322270842959 预测测试图片的图像特征，在训练和测试集中检索
+0.6806124940916969 0.6030668249599961 使用原始测试图像（从VGG中提取）的图像特征，在训练和测试集中检索
+0.8506080080271394 0.8122628671237255 使用原始训练图像（从VGG中提取）的图像特征，在训练和测试集中检索
+0.8425386624619745 0.7923908209325308 预测训练图片的图像特征，在训练和测试集中检索
 """
 
 if __name__ == '__main__':
