@@ -40,7 +40,7 @@ class ModelData(object):
 
     @staticmethod
     def predict(model, pre_process_input, x_in_path, save_path,
-                batch_size=64, target_size=(224, 224), color_mode="rbg"):
+                batch_size=64, target_size=(224, 224), color_mode="rgb"):
         steps = len(x_in_path) // batch_size
         lefts = len(x_in_path) % batch_size
 

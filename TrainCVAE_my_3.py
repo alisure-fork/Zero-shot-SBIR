@@ -3,7 +3,7 @@ import numpy as np
 import tensorflow as tf
 from keras import layers
 import keras.backend as k
-from keras import callbacks, losses
+from keras import callbacks
 from keras.models import Model
 from keras.optimizers import Adam
 import keras.backend.tensorflow_backend as ktf
@@ -451,18 +451,179 @@ class CVAE(object):
 
         pass
 
+    def test2(self):
+
+        def map_change(input_arr):
+            dup = np.copy(input_arr)
+            for _index in range(input_arr.shape[1]):
+                if _index != 0:
+                    dup[:, _index] = dup[:, _index - 1] + dup[:, _index]
+            return np.multiply(dup, input_arr)
+
+        def from_predict_test():
+            # 噪声
+            noise_z = np.random.normal(size=[len(self.test_sketch_paths), self.n_z])
+            # 测试sketch
+            sketch_features_test = np.asarray(
+                [self.test_sketch_x[ii].copy() for ii in range(0, len(self.test_sketch_paths))])
+
+            # 预测的图片的重构特征: noise + sketch -> image features
+            _predict_image_features = self.decoder.predict(
+                {'sketch_features': sketch_features_test, 'input_z': noise_z}, verbose=2)
+
+            # 预测的特征可视化
+            # np.save("./data/test/predict_image.npy", _predict_image_features)
+            return _predict_image_features
+
+        def from_predict_train():
+            # 噪声
+            noise_z = np.random.normal(size=[len(self.train_sketch_classes), self.n_z])
+            # 训练sketch
+            sketch_features_train = np.asarray(
+                [self.train_sketch_x[ii].copy() for ii in range(0, len(self.train_sketch_classes))])
+
+            # 预测的图片的重构特征: noise + sketch -> image features
+            _predict_image_features = self.decoder.predict(
+                {'sketch_features': sketch_features_train, 'input_z': noise_z}, verbose=2)
+
+            # 预测的特征可视化
+            # np.save("./data/test/predict_image.npy", _predict_image_features)
+            return _predict_image_features
+
+        def cal_result(_search_image_features, _search_image_class, _predict_image_features, _test_image_class, info):
+            # 200个最近邻
+            neigh_num = 200
+            # 增强数据集中测试图片的vgg特征
+            nearest_neigh = NearestNeighbors(neigh_num, metric='cosine', algorithm='brute').fit(_search_image_features)
+
+            # 求距离预测图片最近的测试图片：距离和索引
+            distances, indices = nearest_neigh.kneighbors(_predict_image_features)
+
+            # 通过索引得到类别
+            retrieved_classes = _search_image_class[indices]
+
+            # 判断是否正确
+            results = np.zeros(retrieved_classes.shape)
+            for idx in range(results.shape[0]):
+                results[idx] = (retrieved_classes[idx] == _test_image_class[idx])
+                pass
+
+            # 平均准确率
+            _precision_neigh_num = np.mean(np.mean(results, axis=1))
+            # 计算mAP
+            temp = [np.arange(neigh_num) for _ in range(retrieved_classes.shape[0])]
+            m_ap_term = 1.0 / (np.stack(temp, axis=0) + 1)
+            _m_ap = np.mean(np.mean(np.multiply(map_change(results), m_ap_term), axis=1))
+
+            # 输出
+            print('{}'.format(info))
+            print('The mean precision@200 for test sketches is {}'.format(_precision_neigh_num))
+            print('The mAP for test_sketches is {}'.format(_m_ap))
+
+            return _precision_neigh_num, _m_ap
+
+        # 1. 预测测试图片的图像特征，在增强的数据集中检索  0.389,0.270
+        predict_image_features = from_predict_test()
+        test_image_class = self.test_sketch_classes
+        search_image_features = self.img_vgg_features_ext
+        search_image_class = self.image_classes
+        cal_result(search_image_features, search_image_class, predict_image_features, test_image_class,
+                   info="预测测试图片的图像特征，在增强的数据集中检索")
+
+        # 2. 使用原始测试图像（从VGG中提取）的图像特征，在增强的数据集中检索  0.733,0.656
+        predict_image_features = self.test_x_img
+        test_image_class = self.test_sketch_classes
+        search_image_features = self.img_vgg_features_ext
+        search_image_class = self.image_classes
+        cal_result(search_image_features, search_image_class, predict_image_features, test_image_class,
+                   info="使用原始测试图像（从VGG中提取）的图像特征，在增强的数据集中检索")
+
+        # 3. 预测测试图片的图像特征，在测试数据集中检索  0.445,0.340
+        predict_image_features = from_predict_test()
+        test_image_class = self.test_sketch_classes
+        search_image_features = self.test_x_img
+        search_image_class = self.test_sketch_classes
+        cal_result(search_image_features, search_image_class, predict_image_features, test_image_class,
+                   info="预测测试图片的图像特征，在测试数据集中检索")
+
+        # 4. 使用原始测试图像（从VGG中提取）的图像特征，在测试数据集中检索  0.850,0.804
+        predict_image_features = self.test_x_img
+        test_image_class = self.test_sketch_classes
+        search_image_features = self.test_x_img
+        search_image_class = self.test_sketch_classes
+        cal_result(search_image_features, search_image_class, predict_image_features, test_image_class,
+                   info="使用原始测试图像（从VGG中提取）的图像特征，在测试数据集中检索")
+
+        # 5. 预测训练图片的图像特征，在训练集中检索  0.924,0.905
+        predict_image_features = from_predict_train()
+        test_image_class = self.train_sketch_classes
+        search_image_features = self.train_x_img
+        search_image_class = self.train_sketch_classes
+        cal_result(search_image_features, search_image_class, predict_image_features, test_image_class,
+                   info="预测训练图片的图像特征，在训练集中检索")
+
+        # 6. 使用原始训练图像（从VGG中提取）的图像特征，在训练集中检索  0.869,0.835
+        predict_image_features = self.train_x_img
+        test_image_class = self.train_sketch_classes
+        search_image_features = self.train_x_img
+        search_image_class = self.train_sketch_classes
+        cal_result(search_image_features, search_image_class, predict_image_features, test_image_class,
+                   info="使用原始训练图像（从VGG中提取）的图像特征，在训练集中检索")
+
+        # 7. 预测测试图片的图像特征，在训练和测试集中检索  0.056,0.020
+        predict_image_features = from_predict_test()
+        test_image_class = self.test_sketch_classes
+        search_image_features = np.append(self.test_x_img, self.train_x_img, axis=0)
+        search_image_class = np.append(self.test_sketch_classes, self.train_sketch_classes, axis=0)
+        cal_result(search_image_features, search_image_class, predict_image_features, test_image_class,
+                   info="预测测试图片的图像特征，在训练和测试集中检索")
+
+        # 8. 使用原始测试图像（从VGG中提取）的图像特征，在训练和测试集中检索  0.681,0.603
+        predict_image_features = self.test_x_img
+        test_image_class = self.test_sketch_classes
+        search_image_features = np.append(self.test_x_img, self.train_x_img, axis=0)
+        search_image_class = np.append(self.test_sketch_classes, self.train_sketch_classes, axis=0)
+        cal_result(search_image_features, search_image_class, predict_image_features, test_image_class,
+                   info="使用原始测试图像（从VGG中提取）的图像特征，在训练和测试集中检索")
+
+        # 9. 使用原始训练图像（从VGG中提取）的图像特征，在训练和测试集中检索  0.851, 0.812
+        predict_image_features = self.train_x_img
+        test_image_class = self.train_sketch_classes
+        search_image_features = np.append(self.test_x_img, self.train_x_img, axis=0)
+        search_image_class = np.append(self.test_sketch_classes, self.train_sketch_classes, axis=0)
+        cal_result(search_image_features, search_image_class, predict_image_features, test_image_class,
+                   info="使用原始训练图像（从VGG中提取）的图像特征，在训练和测试集中检索")
+
+        # 10. 预测训练图片的图像特征，在训练和测试集中检索  0.919,0.898
+        predict_image_features = from_predict_train()
+        test_image_class = self.train_sketch_classes
+        search_image_features = np.append(self.test_x_img, self.train_x_img, axis=0)
+        search_image_class = np.append(self.test_sketch_classes, self.train_sketch_classes, axis=0)
+        cal_result(search_image_features, search_image_class, predict_image_features, test_image_class,
+                   info="预测训练图片的图像特征，在训练和测试集中检索")
+
+        pass
+
+    def run2(self, model_file, load_weights=True):
+        # 载入模型
+        if os.path.exists(model_file) and load_weights:
+            self.vae.load_weights(model_file, skip_mismatch=True)
+        # 测试
+        self.test2()
+        pass
+
     pass
 
 
 if __name__ == '__main__':
 
-    # 44.1
+    # 44.4
 
     os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"  # see issue #152
-    os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
-    name = "triplet_test"
+    name = "triplet_test_2"
 
-    CVAE(sketchy_data=SketchyData(n_x=4096, n_y=4096 * 2), max_epoch=300,
-         batch_size=1024, summary_path="model/{}/summary".format(name)).run(
-        model_file="model/{}/model.h5".format(name), load_weights=False, save_weights=True)
+    CVAE(sketchy_data=SketchyData(n_x=4096, n_y=4096 * 2), max_epoch=100,
+         batch_size=1024, summary_path="model/{}/summary".format(name)).run2(
+        model_file="model/{}/model.h5".format(name), load_weights=True)
