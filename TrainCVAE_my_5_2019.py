@@ -569,6 +569,14 @@ class CVAE(object):
 
         pass
 
+    def run2(self, model_1_file, model_2_file, load_weights=True):
+        # 载入模型
+        if os.path.exists(model_2_file) and load_weights:
+            self.vae.load_weights(model_2_file, skip_mismatch=True)
+        # 测试
+        self.test2()
+        pass
+
     def test2(self):
 
         def map_change(input_arr):
@@ -740,14 +748,6 @@ class CVAE(object):
 
         pass
 
-    def run2(self, model_1_file, model_2_file, load_weights=True):
-        # 载入模型
-        if os.path.exists(model_2_file) and load_weights:
-            self.vae.load_weights(model_2_file, skip_mismatch=True)
-        # 测试
-        self.test2()
-        pass
-
     pass
 
 
@@ -803,9 +803,9 @@ if __name__ == '__main__':
     os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
     os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 
-    name = "triplet_fine_tune_p2_4096_1"
+    name = "triplet_fine_tune_p2_4096_2019"
 
     CVAE(sketchy_data=SketchyData(n_x=4096, n_y=4096 * 2, n_z=1024, n_d=4096), max_epoch=30,
-         batch_size=1024, summary_path="model/{}/summary".format(name)).run2(
+         batch_size=1024, summary_path="model/{}/summary".format(name)).run(
         model_1_file="model/{}/model_1.h5".format(name),
         model_2_file="model/{}/model_2.h5".format(name), load_weights=True)
